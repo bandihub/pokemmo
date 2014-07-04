@@ -41,6 +41,7 @@
 <script src="http://play.pokemonshowdown.com/data/typechart.js"></script>
 <script src="http://play.pokemonshowdown.com/js/lib/sockjs-0.3.4.min.js"></script>
 <script src="http://play.pokemonshowdown.com/js/lib/html-sanitizer-minified.js?949c4200"></script>
+<script src="http://play.pokemonshowdown.com/data/learnsets-g6.js?6b67f048"></script>
 <script>for (var i in exports) window[i] = exports[i];</script>
 <script src="http://play.pokemonshowdown.com/js/utilichart.js?8a651559"></script>
 <script src="./tools.js"></script>

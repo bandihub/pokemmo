@@ -29,13 +29,51 @@ vars.me = {
 	encounteredMon: false,
 	money: 0,
 };
+//assign team if new game or don't have team or w/e
+//for right now give them a random pokemon to run around with
+assignMon = function() {
+	var pokemonKeys = Object.keys(BattlePokedex);
+	var randomMon = Math.floor(Math.random() * pokemonKeys.length);
+	var pokemon = BattlePokedex[pokemonKeys[randomMon]];
+	var minimumLevel = 50,
+		ability = Math.floor(Math.random() * Object.keys(pokemon.abilities).length),
+		moves = new Array(),
+		hasMove = new Object(),
+		hasAttackingMove = false,
+		learnset = BattleLearnsets[toId(pokemon.species)].learnset;
+	var learnsetKeys = Object.keys(learnset);
+	while(moves.length < 4) {
+		var ranMove = Math.floor(Math.random() * learnsetKeys.length);
+		var move = BattleMovedex[learnsetKeys[ranMove]];
+		if (!hasMove[move]) {
+			if (move.length == 3 && move.category == "Status" && !hasAttackingMove) {} else {
+				moves.push(move.name);
+				hasMove[move.name] = true;
+				if (move.category != "Status") hasAttackingMove = true;
+			}
+		}
+	}
+	var shinyRate = 1 / 1000;
+	var team = [{
+		species: pokemon.species,
+		nature: "Serious",
+		ability: pokemon.abilities[Object.keys(pokemon.abilities)[ability]],
+		level: Math.floor(Math.random() * (100 - minimumLevel + 1)) + minimumLevel,
+		moves: moves,
+		shiny: ((chance(shinyRate * 100)) ? true : false),
+		exp: 0,
+		nextLevelExp: 50,
+	}];
+	vars.me.team = team;
+}();
+vars.grassSpriteValue = {"32": true, "29": true};
 vars.me.gainExp = function() {
 	var numMons = Object.keys(vars.me.expDivision).length,
 		expGain = 100;
 	expGain = expGain / numMons;
 	for (var monKey in vars.me.expDivision) {
 		var mon = vars.me.team[monKey];
-		mon.exp += expDivision;
+		mon.exp += expGain;
 		if (mon.exp > mon.nextLevelExp) {
 			mon.exp = mon.exp - mon.nextLevelExp;
 			mon.nextLevelExp += 50;
@@ -45,6 +83,7 @@ vars.me.gainExp = function() {
 				mon.exp = 0;
 				mon.nextLevelExp = 0;
 			}
+			alert("Your pokemon just leveled up to level " + mon.level);
 		}
 	}
 	vars.me.expDivison = new Object();
@@ -79,11 +118,17 @@ vars.ccm = {
 			insides += '<div id="p' + userid + '" class="player" style="';
 			insides += 'left: ' + left + 'px;';
 			insides += 'top: ' + top + 'px;';
-			insides += 'background: url(' + vars.spritesURL + ') ' + (vars.character.x * -1) + 'px ' + (vars.character.y * -1) + 'px;';
 			insides += 'width: ' + vars.blockWidth + 'px;';
 			insides += 'height: ' + vars.blockHeight + 'px;';
 			insides += '">';
-			insides += '<span class="nametag">' + userid + '</span></div>';
+			insides += '<div class="p" style="';
+			insides += 'background: url(' + vars.spritesURL + ') ' + (vars.character.x * -1) + 'px ' + (vars.character.y * -1) + 'px;';
+			insides += 'width: ' + vars.character.width + 'px;';
+			insides += 'height: ' + vars.character.height + 'px;';
+			insides += '">';
+			insides += '</div>';
+			insides += '<span class="nametag">' + userid + '</span>';
+			insides += '</div>';
 			$('#layer1').append(insides);
 		}
 	},
@@ -131,13 +176,13 @@ vars.ccm = {
 	}
 };
 //vars.encounterMons should be loaded with the new maps aswell as a sort of grass patch map so we know what spots will be the places we can encounter wild pokemon
-vars.map = [[[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,-1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,-1,-1],[-1,-1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[0,0,0,0,0,0,0,6,0,6,0,0,0,6,0,0,0,0,19,16,0,18,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,0,17,0,0,0,0,19,16,19,0,19,0,0,0,0,6,18,0,0,0,0,19,0,0,0],[0,0,0,0,6,0,0,6,19,0,18,0,0,0,0,17,0,0,6,0,0,0,0,0,16,0,0,0,19,0,0],[0,0,6,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,0,0,6,0,0,0,0,0,6],[0,0,0,0,0,18,0,0,0,0,19,19,0,0,0,0,0,0,0,19,17,0,0,0,18,19,0,19,0,0,0],[0,0,6,0,0,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0],[0,17,6,0,0,16,19,0,6,0,6,19,0,0,19,0,0,0,0,0,0,0,0,0,17,0,19,0,0,0,0],[0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0],[0,0,0,0,19,0,0,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,6,0,6,0],[0,17,0,0,6,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0,0,0,6,0],[6,0,6,0,0,16,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,6,0,0,0,6,0,0,19,18,0,0],[0,0,0,18,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,17,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,6,6,0,0],[0,0,0,0,6,0,0,19,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,19,0,6,0,6,0,0,19],[0,0,6,0,6,0,17,18,0,0,0,0,0,0,18,0,6,0,0,16,0,0,19,0,6,0,6,0,0,0,0],[0,0,0,6,18,18,19,0,6,0,0,0,16,0,0,0,0,0,0,18,0,0,6,6,6,17,17,0,0,0,0],[0,0,0,0,6,18,0,0,0,0,0,19,17,19,0,0,19,0,0,0,0,0,18,0,19,18,6,0,0,0,0],[0,0,0,0,0,16,0,16,0,18,19,0,0,0,6,0,6,0,6,0,0,0,6,19,0,0,0,19,0,0,0],[0,0,16,0,0,0,6,6,0,0,0,6,0,0,0,0,0,6,17,0,0,6,19,6,17,6,0,0,6,0,0],[6,6,0,16,0,0,0,0,6,0,6,0,0,0,0,0,6,6,0,0,0,0,0,0,0,0,0,6,0,0,0]],[{"sprite":8,"column":4,"row":7},{"sprite":5,"column":1,"row":3},{"sprite":5,"column":1,"row":25},{"sprite":5,"column":8,"row":29},{"sprite":5,"column":8,"row":0},{"sprite":5,"column":16,"row":3},{"sprite":5,"column":16,"row":23},{"sprite":6,"column":13,"row":9},{"sprite":6,"column":13,"row":17},{"sprite":6,"column":14,"row":13},{"sprite":6,"column":17,"row":0},{"sprite":6,"column":17,"row":5},{"sprite":6,"column":17,"row":20},{"sprite":6,"column":17,"row":25},{"sprite":6,"column":9,"row":26},{"sprite":6,"column":2,"row":22},{"sprite":6,"column":2,"row":27},{"sprite":6,"column":2,"row":0},{"sprite":6,"column":2,"row":5},{"sprite":6,"column":9,"row":2},{"sprite":24,"column":7,"row":13},{"sprite":23,"column":12,"row":24},{"sprite":14,"column":7,"row":14}]];
+vars.map = [[[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,1,1,32,1,1,1,1,32,1,1,1,32,32,32,32,32,32,1,32,1,1,1,1,1,1,1,1,1,1,-1],[-1,32,1,-1,-1,1,32,1,1,1,1,32,32,32,32,32,32,32,32,1,1,1,32,1,1,-1,-1,1,1,1,-1],[-1,32,32,-1,-1,1,1,1,1,1,32,32,32,32,32,32,32,32,32,32,1,32,1,1,1,-1,-1,1,1,32,-1],[-1,32,32,32,32,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,32,1,1,1,32,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,32,1,1,1,1,-1],[-1,1,1,1,32,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,32,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,32,32,1,1,1,32,1,-1],[-1,-1,32,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,32,32,32,32,1,1,-1,-1],[-1,-1,32,32,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,32,32,32,32,1,1,-1,-1],[-1,1,32,32,32,32,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,32,32,32,32,32,1,32,32],[-1,1,32,32,32,32,1,-1,-1,-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,-1,-1,32,-1,-1,-1,-1,-1,32,-1],[-1,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,-1,1,1,1,-1,32,-1],[-1,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,1,32,-1,1,1,1,-1,32,-1],[-1,1,1,1,32,1,1,1,1,32,32,32,32,1,32,1,1,32,32,32,32,1,1,32,32,-1,-1,-1,-1,32,-1],[-1,1,1,1,1,1,1,1,1,32,32,32,1,1,1,1,1,32,32,32,1,32,1,1,32,32,32,32,32,32,-1],[-1,1,1,-1,-1,1,1,1,1,32,32,1,1,1,1,32,1,1,32,32,1,1,1,-1,-1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,32,1,32,1,1,1,32,1,1,1,32,1,32,1,1,1,-1,-1,1,1,32,1,1,-1],[-1,32,1,1,1,1,1,1,1,32,1,32,1,1,1,32,1,1,1,32,1,1,32,1,1,1,1,1,1,1,-1],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[0,0,0,0,0,0,0,6,0,6,0,0,0,6,0,0,0,0,19,16,0,18,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,0,17,0,0,0,0,19,16,19,0,19,0,0,0,0,6,18,0,0,0,0,19,0,0,0],[0,0,0,0,6,0,0,6,19,0,18,0,0,0,0,17,0,0,6,0,0,0,0,0,16,0,0,0,19,0,0],[0,0,6,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,0,0,6,0,0,0,0,0,6],[0,0,0,0,0,18,0,0,0,0,19,19,0,0,0,0,0,0,0,19,17,0,0,0,18,19,0,19,0,0,0],[0,0,6,0,0,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0],[0,17,6,0,0,16,19,0,6,0,6,19,0,0,19,0,0,0,0,0,0,0,0,0,17,0,19,0,0,0,0],[0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0],[0,0,0,0,19,0,0,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,6,0,6,0],[0,17,0,0,6,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0,0,0,6,0],[6,0,6,0,0,16,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,6,0,0,0,6,0,0,19,18,0,0],[0,0,0,18,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,17,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,6,6,0,0],[0,0,0,0,6,0,0,19,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,19,0,6,0,6,0,0,19],[0,0,6,0,6,0,17,18,0,0,0,0,0,0,18,0,6,0,0,16,0,0,19,0,6,0,6,0,0,0,0],[0,0,0,6,18,18,19,0,6,0,0,0,16,0,0,0,0,0,0,18,0,0,6,6,6,17,17,0,0,0,0],[0,0,0,0,6,18,0,0,0,0,0,19,17,19,0,0,19,0,0,0,0,0,18,0,19,18,6,0,0,0,0],[0,0,0,0,0,16,0,16,0,18,19,0,0,0,6,0,6,0,6,0,0,0,6,19,0,0,0,19,0,0,0],[0,0,16,0,0,0,6,6,0,0,0,6,0,0,0,0,0,6,17,0,0,6,19,6,17,6,0,0,6,0,0],[6,6,0,16,0,0,0,0,6,0,6,0,0,0,0,0,6,6,0,0,0,0,0,0,0,0,0,6,0,0,0]],[{"sprite":8,"column":4,"row":7},{"sprite":5,"column":2,"row":25},{"sprite":5,"column":2,"row":3},{"sprite":5,"column":17,"row":23},{"sprite":5,"column":17,"row":3},{"sprite":5,"column":8,"row":29},{"sprite":5,"column":8,"row":0},{"sprite":23,"column":12,"row":24},{"sprite":24,"column":7,"row":13},{"sprite":14,"column":7,"row":14}]];
 vars.encounterMons = {
-	"delibird": 0,
-	"zubat": 1,
-	"crobat": 2,
-	"dunsparce": 3,
-	"swalot": 4
+	"swalot": 0,
+	"rattata": 1,
+	"magikarp": 2,
+	"pikachu": 3,
+	"bidoof": 4,
 };
 vars.walkVelocity = 1;
 vars.runVelocity = 2;
@@ -154,6 +199,8 @@ vars.character = {
 	},
 	cycle: 0,
 	cycleType: "walk",
+	width: 14,
+	height: 19,
 	x: 481,
 	y: 387,
 	directionsOrder: ["down", "left", "up", "right", /* walk */ "down", "left", "up", "right" /* run */],
@@ -244,14 +291,14 @@ vars.movementLoop = function() {
 	var playersmoving = false;
 	for (var userid in vars.animateMe) {
 		playersmoving = true;
-		var player, el;
+		var player, sprite, container;
 		if (userid == "|me|") {
 			player = vars.character;
-			el = $("#player");
+			sprite = $("#player .p"), container = $("#player");
 			player.oldCoordinates = {x: player.coordinates.x, y: player.coordinates.y};
 		} else {
 			player = vars.ccm.players[userid];
-			el = $("#p" + userid);
+			sprite = $("#p" + userid + " .p"), container = $("#p" + userid);
 		}
 		var direction = player.direction;
 		player.cycle++;
@@ -271,7 +318,9 @@ vars.movementLoop = function() {
 			player.coordinates.y = nextY;
 			player.y = nextY;
 		}
-		if (vars.map[0][player.coordinates.y] && vars.map[0][player.coordinates.y][player.coordinates.x] != undefined && vars.map[0][player.coordinates.y][player.coordinates.x] < 0) {
+		var backgroundSpriteValue, moved;
+		if (vars.map[0][player.coordinates.y] && vars.map[0][player.coordinates.y][player.coordinates.x] != undefined) backgroundSpriteValue = vars.map[0][player.coordinates.y][player.coordinates.x];
+		if (backgroundSpriteValue < 0) {
 			//negative values on the map stop movements
 			player.coordinates = {
 				x: cachedCoordinates.x,
@@ -279,32 +328,29 @@ vars.movementLoop = function() {
 			};
 			player.x = cachedCoordinates.x;
 			player.y = cachedCoordinates.y;
-		} else {
-			//if we have changed our coordinates and we're on a place where pokemon is encounterable
-			function chance(percent) {
-				var random = Math.floor(Math.random() * 100) + 1;
-				if (random > percent) return false;
-				return true;
-			}
-			function encounterMon() {
-				for (var monId in vars.encounterMons) {
-					var monEncounterRank = vars.encounterMons[monId];
-					var probability = vars.rates.encounterRate[monEncounterRank] / 187.5;
-					probability = probability * 100;
-					if (chance(probability)) {
-						//set our own team
-						client.send('/utm ' + Tools.packTeam(vars.me.team));
-						//send the server the pokemon we've encountered
-						client.send('/e ' + monId);
-						//on server create pokemon based on the monId
-						//on server do Rooms.global.startBattle(VS BOOTY BOT and set her team as monId pokemon we created)
-						vars.me.encounteredMon = monId;
+		}
+		else {
+				//if we have changed our coordinates and we're on a place where pokemon is encounterable
+				moved = true;
+				function encounterMon() {
+					for (var monId in vars.encounterMons) {
+						var monEncounterRank = vars.encounterMons[monId];
+						var probability = vars.rates.encounterRate[monEncounterRank] / 187.5;
+						probability = probability * 100;
+						if (chance(probability)) {
+							//set our own team
+							client.send('/utm ' + Tools.packTeam(vars.me.team));
+							//send the server the pokemon we've encountered
+							client.send('/e ' + monId);
+							//on server create pokemon based on the monId
+							//on server do Rooms.global.startBattle(VS BOOTY BOT and set her team as monId pokemon we created)
+							vars.me.encounteredMon = monId;
+						}
 					}
 				}
+				if (!vars.me.encounteredMon && !vars.battling() && vars.grassSpriteValue[backgroundSpriteValue] && moved) encounterMon();
 			}
-			if (!vars.me.encounteredMon) encounterMon();
-		}
-		el.css("background", css);
+		sprite.css("background", css);
 		if (userid != "|me|") vars.ccm.updateCoordinates(player);
 	}
 	if (playersmoving) callLoop = callLoop();
@@ -366,7 +412,23 @@ $(function() {
 	});
 	for (var y = 0; y < vars.blocksShown.y; y++) for (var x = 0; x < vars.blocksShown.x; x++) $("#canvas").append('<div id="b' + x + '-' + y + '" class="block"></div>');
 	var characterCoordinates = $("#b" + vars.character.coordinates.x + "-" + vars.character.coordinates.y);
-	$("body").append('<div id="player" class="player" style="background: url(' + vars.spritesURL + ') ' + (vars.character.x * -1) + 'px ' + (vars.character.y * -1) + 'px;width: ' + vars.blockWidth + 'px;height: ' + vars.blockHeight + 'px;top: ' + characterCoordinates.position().top + 'px;left: ' + characterCoordinates.position().left + 'px;"></div>');
+	var playerInsides = '';
+		playerInsides += '<div id="player" class="player" style="';
+		playerInsides += 'left: ' + characterCoordinates.position().left + 'px;';
+		playerInsides += 'top: ' + characterCoordinates.position().top + 'px;';
+		playerInsides += 'width: ' + vars.blockWidth + 'px;';
+		playerInsides += 'height: ' + vars.blockHeight + 'px;';
+		playerInsides += '">';
+		playerInsides += '<div class="p" style="';
+		playerInsides += 'background: url(' + vars.spritesURL + ') ' + (vars.character.x * -1) + 'px ' + (vars.character.y * -1) + 'px;';
+		playerInsides += 'width: ' + vars.character.width + 'px;';
+		playerInsides += 'height: ' + vars.character.height + 'px;';
+		playerInsides += '">';
+		playerInsides += '</div>';
+		playerInsides += '<span class="nametag"><font color=red>ME</font></span>';
+		playerInsides += '</div>';
+	$("body").append(playerInsides);
+
 	vars.updateMap();
 	function screenResize() {
 		var canvas = $("#canvasContainer"),
@@ -394,6 +456,11 @@ $(function() {
 			40: "down"
 		};
 		var key = keys[e.keyCode];
-		if (key && search.username && !vars.battling()) vars.gameControls("keyup" + key);
+		if (key && search.username) vars.gameControls("keyup" + key);
 	});
 })
+function chance(percent) {
+	var random = Math.floor(Math.random() * 100) + 1;
+	if (random > percent) return false;
+	return true;
+}

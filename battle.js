@@ -1,7 +1,7 @@
 var Battle = function(roomid, type, nojoin) {
 	var room = this;
 	var chatholder = $("body");
-	var insides = '<div id="' + roomid + 'battle" class="battle">';
+	var insides = '<div id="' + roomid + 'battle" class="battle" style="z-index: 3;">';
 	insides += '<div id="' + roomid + '"container" class="relative">';
 	//battle stuff
 	insides += '<div class="battle-containment">';
@@ -433,7 +433,7 @@ var Battle = function(roomid, type, nojoin) {
 				current.newHP = (A.currentHP / A.totalHP * 100); //this makes it so that the heal/damage event below changes the hp :)
 				current.updateIcons = true; //does the same for the icons as setting current.newHP
 				var status = '<span class="' + A.status + '">' + A.status + '</span>';
-				$("#" + roomid + who + "condition").html(A.nickname + " - " + (Math.round(current.newHP * 10) / 10) + "% " + status);
+				$("#" + roomid + who + "condition").html("<i><b>L</b><small><small>" + A.level + "</small></small></i> " + A.nickname + " - " + (Math.round(current.newHP * 10) / 10) + "% " + status);
 				
 				//sprite display
 				var url = Tools.getBattleSprite(A, ((who == "you") ? true : false));
@@ -450,7 +450,7 @@ var Battle = function(roomid, type, nojoin) {
 					var status = '<span class="' + A.status + '">' + A.status + '</span>';
 					var percent = (A.currentHP / A.totalHP * 100);
 					$("#" + roomid + who + "hpwidth").animate({"width": percent + "%"}, 500, function() {
-						$("#" + roomid + who + "condition").html(A.nickname + " - " + (Math.round(percent * 10) / 10) + "% " + status);
+						$("#" + roomid + who + "condition").html("<i><b>L</b><small>" + A.level + "</small></i> " + A.nickname + " - " + (Math.round(percent * 10) / 10) + "% " + status);
 					});
 				}
 			}
@@ -458,7 +458,7 @@ var Battle = function(roomid, type, nojoin) {
 			if (current.updateStatus || current.event == "-status" || current.event == "-curestatus") {
 				var A = this.battle[playerA];
 				var status = '<span class="' + A.status + '">' + A.status + '</span>';
-				$("#" + roomid + who + "condition").html(A.nickname + " - " + (Math.round((A.currentHP / A.totalHP * 100) * 10) / 10) + "% " + status);
+				$("#" + roomid + who + "condition").html("<i><b>L</b><small>" + A.level + "</small></i> " + A.nickname + " - " + (Math.round((A.currentHP / A.totalHP * 100) * 10) / 10) + "% " + status);
 			}
 			//FAINT EVENT
 			if (current.event == "faint") {
@@ -551,7 +551,7 @@ var Battle = function(roomid, type, nojoin) {
 				var nickname = row1[1];
 				var row2 = row[2].split(', ');
 				var species = row2[0];
-				var level = Math.floor(row2[1]);
+				var level = Math.floor(row2[1].replace("L", ""));
 				var gender = "";
 				if (row2[2]) gender = row2[2];
 				var row3 = row[3].split(" ");
@@ -644,6 +644,7 @@ var Battle = function(roomid, type, nojoin) {
 				var plusorminus = -1;
 				if (row[0] == this.battle[this.battle.you].name) plusorminus = 1;
 				vars.me.money += 100 * plusorminus;
+				vars.me.encounteredMon = false;
 				if (vars.me.money < 0) vars.me.money = 0;
 				this.toTimeline({event: row[0], msg: "You " + ((plusorminus == 1) ? "won" : "lost") + ". You now have $" + vars.me.money + "."});
 			} else if (row[0] == "request") {

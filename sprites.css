@@ -8,7 +8,7 @@
 	/* grass */
 	width: 46px;
 	height: 23px;
-	background: url(./sprites.png) -7px -1806px;
+	background: url(./sprites.png) -8px -1806px;
 }
 .sprite2, .sprite-2 {
 	/* red design */
@@ -189,4 +189,10 @@
 	width: 17px;
 	height: 16px;
 	background: url(./sprites.png) -1471px -78px;
+}
+.sprite32, .sprite-32 {
+	/* wild grass */
+	width: 16px;
+	height: 19px;
+	background: url(./sprites.png) -563px -1312px;
 }
