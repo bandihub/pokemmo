@@ -24,6 +24,27 @@ vars.me = {
 	encounteredMon: false,
 	money: 0,
 };
+vars.me.gainExp = function() {
+	var numMons = Object.keys(vars.me.expDivision).length,
+		expGain = 100;
+	expGain = expGain / numMons;
+	for (var monKey in vars.me.expDivision) {
+		var mon = vars.me.team[monKey];
+		mon.exp += expDivision;
+		if (mon.exp > mon.nextLevelExp) {
+			mon.exp = mon.exp - mon.nextLevelExp;
+			mon.nextLevelExp += 50;
+			mon.level += 1;
+			if (mon.level > 100) {
+				mon.level = 100;
+				mon.exp = 0;
+				mon.nextLevelExp = 0;
+			}
+		}
+	}
+	vars.me.expDivison = new Object();
+	vars.me.encounteredMon = false;
+};
 vars.battling = false;
 vars.ccm = {
 	players: new Object(),
