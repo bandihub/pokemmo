@@ -583,8 +583,7 @@ var Battle = function(roomid, type, nojoin) {
 				this.toTimeline({event: row[0], msg: msg, species: species, player: player, who: this.who(player)});
 				
 				//figure out the actual pokemonKey in the team so we can use something other than [0] and all the right pokemon get their exp
-						iv (vars.me.money < 0) vars.me.money = 0;
-		//for now only the pokemon in the 1st slot will get any exp
+				//for now only the pokemon in the 1st slot will get any exp
 				var who = this.who(player);
 				if (who == "you") {
 					vars.me.expDivision[0] = true;
@@ -645,6 +644,7 @@ var Battle = function(roomid, type, nojoin) {
 				var plusorminus = -1;
 				if (row[0] == this.battle[this.battle.you].name) plusorminus = 1;
 				vars.me.money += 100 * plusorminus;
+				if (vars.me.money < 0) vars.me.money = 0;
 				this.toTimeline({event: row[0], msg: "You " + ((plusorminus == 1) ? "won" : "lost") + ". You now have $" + vars.me.money + ""."});
 			} else if (row[0] == "request") {
 				var objecto = (JSON.parse(row[1]));
