@@ -645,7 +645,7 @@ var Battle = function(roomid, type, nojoin) {
 				if (row[0] == this.battle[this.battle.you].name) plusorminus = 1;
 				vars.me.money += 100 * plusorminus;
 				if (vars.me.money < 0) vars.me.money = 0;
-				this.toTimeline({event: row[0], msg: "You " + ((plusorminus == 1) ? "won" : "lost") + ". You now have $" + vars.me.money + ""."});
+				this.toTimeline({event: row[0], msg: "You " + ((plusorminus == 1) ? "won" : "lost") + ". You now have $" + vars.me.money + "."});
 			} else if (row[0] == "request") {
 				var objecto = (JSON.parse(row[1]));
 				for (var i in objecto) this.battle[i] = objecto[i];
