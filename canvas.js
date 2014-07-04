@@ -14,6 +14,17 @@ var vars = {
 	},
 	sprites: new Array(),
 };
+vars.rates = {
+	encounterRate: [1.25, 3.33, 6.75, 8.5, 10],
+};
+vars.me = {
+	team: new Object(),
+	//inside team {"pokemonid": {exp: 100, nextLevelExp: 1000, leve: 99, //the rest of it is normal}}
+	expDivision: new Object(),
+	encounteredMon: false,
+	money: 0,
+};
+vars.battling = false;
 vars.ccm = {
 	players: new Object(),
 	addPlayer: function(userid, x, y) {
@@ -94,7 +105,15 @@ vars.ccm = {
 		vars.initMovementLoop();
 	}
 };
+//vars.encounterMons should be loaded with the new maps aswell as a sort of grass patch map so we know what spots will be the places we can encounter wild pokemon
 vars.map = [[[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,-1,-1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,-1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,1,1,1,1,1,1,-1,-1],[-1,-1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,1,1,1,-1,-1,-1,-1,-1,-1,1,-1,-1,-1,-1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,1,1,1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,-1,-1,-1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,-1],[-1,1,1,-1,-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1,-1,1,1,1,1,1,-1],[-1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,-1],[-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1],[0,0,0,0,0,0,0,6,0,6,0,0,0,6,0,0,0,0,19,16,0,18,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,0,17,0,0,0,0,19,16,19,0,19,0,0,0,0,6,18,0,0,0,0,19,0,0,0],[0,0,0,0,6,0,0,6,19,0,18,0,0,0,0,17,0,0,6,0,0,0,0,0,16,0,0,0,19,0,0],[0,0,6,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,6,0,0,0,6,0,0,0,0,0,6],[0,0,0,0,0,18,0,0,0,0,19,19,0,0,0,0,0,0,0,19,17,0,0,0,18,19,0,19,0,0,0],[0,0,6,0,0,0,6,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0],[0,17,6,0,0,16,19,0,6,0,6,19,0,0,19,0,0,0,0,0,0,0,0,0,17,0,19,0,0,0,0],[0,0,18,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0],[0,0,0,0,19,0,0,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,17,6,0,6,0],[0,17,0,0,6,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,19,0,0,0,6,0],[6,0,6,0,0,16,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,19,0,0,6,0,0,0,0,0,6,0,0,0,0,0,0,0,6,0,0,0,6,0,0,19,18,0,0],[0,0,0,18,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],[0,0,0,0,17,0,19,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,6,6,0,0],[0,0,0,0,6,0,0,19,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,19,0,6,0,6,0,0,19],[0,0,6,0,6,0,17,18,0,0,0,0,0,0,18,0,6,0,0,16,0,0,19,0,6,0,6,0,0,0,0],[0,0,0,6,18,18,19,0,6,0,0,0,16,0,0,0,0,0,0,18,0,0,6,6,6,17,17,0,0,0,0],[0,0,0,0,6,18,0,0,0,0,0,19,17,19,0,0,19,0,0,0,0,0,18,0,19,18,6,0,0,0,0],[0,0,0,0,0,16,0,16,0,18,19,0,0,0,6,0,6,0,6,0,0,0,6,19,0,0,0,19,0,0,0],[0,0,16,0,0,0,6,6,0,0,0,6,0,0,0,0,0,6,17,0,0,6,19,6,17,6,0,0,6,0,0],[6,6,0,16,0,0,0,0,6,0,6,0,0,0,0,0,6,6,0,0,0,0,0,0,0,0,0,6,0,0,0]],[{"sprite":8,"column":4,"row":7},{"sprite":5,"column":1,"row":3},{"sprite":5,"column":1,"row":25},{"sprite":5,"column":8,"row":29},{"sprite":5,"column":8,"row":0},{"sprite":5,"column":16,"row":3},{"sprite":5,"column":16,"row":23},{"sprite":6,"column":13,"row":9},{"sprite":6,"column":13,"row":17},{"sprite":6,"column":14,"row":13},{"sprite":6,"column":17,"row":0},{"sprite":6,"column":17,"row":5},{"sprite":6,"column":17,"row":20},{"sprite":6,"column":17,"row":25},{"sprite":6,"column":9,"row":26},{"sprite":6,"column":2,"row":22},{"sprite":6,"column":2,"row":27},{"sprite":6,"column":2,"row":0},{"sprite":6,"column":2,"row":5},{"sprite":6,"column":9,"row":2},{"sprite":24,"column":7,"row":13},{"sprite":23,"column":12,"row":24},{"sprite":14,"column":7,"row":14}]];
+vars.encounterMons = {
+	"delibird": 0,
+	"zubat": 1,
+	"crobat": 2,
+	"dunsparce": 3,
+	"swalot": 4
+};
 vars.walkVelocity = 1;
 vars.runVelocity = 2;
 vars.fps = 1000 / 10;
@@ -235,6 +254,30 @@ vars.movementLoop = function() {
 			};
 			player.x = cachedCoordinates.x;
 			player.y = cachedCoordinates.y;
+		} else {
+			//if we have changed our coordinates and we're on a place where pokemon is encounterable
+			function chance(percent) {
+				var random = Math.floor(Math.random() * 100) + 1;
+				if (random > percent) return false;
+				return true;
+			}
+			function encounterMon() {
+				for (var monId in vars.encounterMons) {
+					var monEncounterRank = vars.encounterMons[monId];
+					var probability = vars.rates.encounterRate[monEncounterRank] / 187.5;
+					probability = probability * 100;
+					if (chance(probability)) {
+						//set our own team
+						client.send('/utm ' + Tools.packTeam(vars.me.team));
+						//send the server the pokemon we've encountered
+						client.send('/encountermon ' + monId);
+						//on server create pokemon based on the monId
+						//on server do Rooms.global.startBattle(VS BOOTY BOT and set her team as monId pokemon we created)
+						vars.me.encounteredMon = monId;
+					}
+				}
+			}
+			if (!vars.me.encounteredMon) encounterMon();
 		}
 		el.css("background", css);
 		if (userid != "|me|") vars.ccm.updateCoordinates(player);
@@ -317,7 +360,7 @@ $(function() {
 			40: "down"
 		};
 		var key = keys[e.keyCode];
-		if (key && search.username) vars.gameControls("keydown" + key);
+		if (key && search.username && !vars.battling) vars.gameControls("keydown" + key);
 	}).keyup(function(e) {
 		var keys = {
 			37: "left",
@@ -326,6 +369,6 @@ $(function() {
 			40: "down"
 		};
 		var key = keys[e.keyCode];
-		if (key && search.username) vars.gameControls("keyup" + key);
+		if (key && search.username && !vars.battling) vars.gameControls("keyup" + key);
 	});
 })
