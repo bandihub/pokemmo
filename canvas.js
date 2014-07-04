@@ -14,6 +14,11 @@ var vars = {
 	},
 	sprites: new Array(),
 };
+vars.battling = function() {
+	var battling = false;
+	for (var roomid in client.rooms) if (client.rooms[roomid].battling) return true;
+	return battling;
+};
 vars.rates = {
 	encounterRate: [1.25, 3.33, 6.75, 8.5, 10],
 };
@@ -45,7 +50,6 @@ vars.me.gainExp = function() {
 	vars.me.expDivison = new Object();
 	vars.me.encounteredMon = false;
 };
-vars.battling = false;
 vars.ccm = {
 	players: new Object(),
 	addPlayer: function(userid, x, y) {
@@ -381,7 +385,7 @@ $(function() {
 			40: "down"
 		};
 		var key = keys[e.keyCode];
-		if (key && search.username && !vars.battling) vars.gameControls("keydown" + key);
+		if (key && search.username && !vars.battling()) vars.gameControls("keydown" + key);
 	}).keyup(function(e) {
 		var keys = {
 			37: "left",
@@ -390,6 +394,6 @@ $(function() {
 			40: "down"
 		};
 		var key = keys[e.keyCode];
-		if (key && search.username && !vars.battling) vars.gameControls("keyup" + key);
+		if (key && search.username && !vars.battling()) vars.gameControls("keyup" + key);
 	});
 })
