@@ -23,7 +23,7 @@ vars.rates = {
 	encounterRate: [1.25, 3.33, 6.75, 8.5, 10],
 };
 vars.me = {
-	team: new Object(),
+	team: new Array(),
 	//inside team {"pokemonid": {exp: 100, nextLevelExp: 1000, leve: 99, //the rest of it is normal}}
 	expDivision: new Object(),
 	encounteredMon: false,
