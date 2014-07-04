@@ -45,7 +45,6 @@ var Battle = function(roomid, type, nojoin) {
 			return false;
 		}
 	});
-	
 	room.id = roomid;
 	room.receive = function(data) {this.add(data);};
 	room.$chat = $("#" + roomid + "logs");
@@ -582,6 +581,17 @@ var Battle = function(roomid, type, nojoin) {
 				var msg = '<div>' + this.battle[player].name + ' sent out ' + species + '!</div>';
 				if (row[0] == "drag") msg = '<div>' + this.battle[player].name + '\'s ' + species + ' was dragged out.</div>';
 				this.toTimeline({event: row[0], msg: msg, species: species, player: player, who: this.who(player)});
+				
+				//figure out the actual pokemonKey in the team so we can use something other than [0] and all the right pokemon get their exp
+						iv (vars.me.money < 0) vars.me.money = 0;
+		//for now only the pokemon in the 1st slot will get any exp
+				var who = this.who(player);
+				if (who == "you") {
+					vars.me.expDivision[0] = true;
+				} else {
+					vars.me.expDivision = new Object();
+					vars.me.expDivision[0] = true;
+				}
 			} else if (row[0] == "-heal" || row[0] == "-damage") {
 				var playernumA = row[1].split(': ')[0];
 				var newhp = row[2].split(' ')[0].split('/');
@@ -632,6 +642,10 @@ var Battle = function(roomid, type, nojoin) {
 				this.toTimeline({event: row[0], player: playernumA, who: this.who(playernumA), substitute: this.battle[playernumA].substitute});
 			} else if (row[0] == "win") {
 				this.toTimeline({event: row[0], msg: "<div><b>" + row[1] + "</b> won the battle. " + 'The battle is over. Click <button onclick="client.send(\'/leave\', \'' + this.id + '\');">here</button> to leave the battle.' + "</div>"});
+				var plusorminus = -1;
+				if (row[0] == this.battle[this.battle.you].name) plusorminus = 1;
+				vars.me.money += 100 * plusorminus;
+				this.toTimeline({event: row[0], msg: "You " + ((plusorminus == 1) ? "won" : "lost") + ". You now have $" + vars.me.money + ""."});
 			} else if (row[0] == "request") {
 				var objecto = (JSON.parse(row[1]));
 				for (var i in objecto) this.battle[i] = objecto[i];
@@ -681,6 +695,7 @@ var Battle = function(roomid, type, nojoin) {
 				this.decision = undefined;
 				var playernumA = row[1].split(': ')[0];
 				this.toTimeline({event: row[0], msg: '<div>' + ((playernumA == this.battle.you + "a") ? 'The opposing ' : '') + row[1].split(': ')[1] + " fainted.</div>", player: playernumA, who: this.who(playernumA)});
+				if (this.who(playernumA) == "opp") vars.me.gainExp();
 			} else if (row[0] == "turn") {
 				this.decision = undefined;
 				this.battle.turn = Math.floor(row[1]);
