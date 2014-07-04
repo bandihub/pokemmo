@@ -295,7 +295,7 @@ vars.movementLoop = function() {
 						//set our own team
 						client.send('/utm ' + Tools.packTeam(vars.me.team));
 						//send the server the pokemon we've encountered
-						client.send('/encountermon ' + monId);
+						client.send('/e ' + monId);
 						//on server create pokemon based on the monId
 						//on server do Rooms.global.startBattle(VS BOOTY BOT and set her team as monId pokemon we created)
 						vars.me.encounteredMon = monId;
